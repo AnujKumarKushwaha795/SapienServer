@@ -1,5 +1,5 @@
 const express = require('express');
-const serverless = require('@netlify/functions');
+const { handler: serverlessHandler } = require('@netlify/functions');
 const cors = require('cors');
 
 const app = express();
@@ -17,7 +17,7 @@ app.use(cors({
 app.use(express.json());
 
 // Add a root route
-app.get('/.netlify/functions/api', (req, res) => {
+app.get('/', (req, res) => {
     console.log('GET request received at /', {
         timestamp: new Date().toISOString(),
         headers: req.headers,
@@ -69,5 +69,6 @@ app.use((err, req, res, next) => {
     });
 });
 
-const handler = serverless.handler(app);
+// Create handler
+const handler = serverlessHandler(app);
 module.exports = { handler }; 
