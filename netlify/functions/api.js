@@ -17,7 +17,7 @@ app.use(cors({
 app.use(express.json());
 
 // Add a root route
-app.get('/', (req, res) => {
+app.get('/.netlify/functions/api', (req, res) => {
     console.log('GET request received at /', {
         timestamp: new Date().toISOString(),
         headers: req.headers,
