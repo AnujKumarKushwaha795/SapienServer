@@ -1,8 +1,7 @@
 const express = require('express');
 const serverless = require('serverless-http');
 const cors = require('cors');
-const chromium = require('chrome-aws-lambda');
-const puppeteer = require('puppeteer-core');
+const playwright = require('playwright-core');
 
 const router = express.Router();
 const app = express();
@@ -32,34 +31,26 @@ router.post('/echo', async (req, res) => {
         case 'play_now_clicked':
             try {
                 // Launch browser
-                const browser = await puppeteer.launch({
-                    args: chromium.args,
-                    defaultViewport: chromium.defaultViewport,
-                    executablePath: await chromium.executablePath,
-                    headless: true,
+                const browser = await playwright.chromium.launch({
+                    headless: true
                 });
 
-                // Create new page
-                const page = await browser.newPage();
+                // Create new context and page
+                const context = await browser.newContext();
+                const page = await context.newPage();
                 
                 // Navigate to Sapien
-                await page.goto('https://game.sapien.io/', {
-                    waitUntil: 'networkidle0',
-                });
+                await page.goto('https://game.sapien.io/');
 
-                // Wait for button to be visible
-                await page.waitForSelector('.Hero_cta-button__oTOqM');
-
-                // Click the button
-                await page.click('.Hero_cta-button__oTOqM');
+                // Wait for button and click it
+                const button = await page.waitForSelector('.Hero_cta-button__oTOqM');
+                await button.click();
 
                 // Wait for navigation
-                await page.waitForNavigation({
-                    waitUntil: 'networkidle0',
-                });
+                await page.waitForURL('https://app.sapien.io/t/dashboard', { timeout: 10000 });
 
-                // Get current URL
-                const currentUrl = page.url();
+                // Get final URL
+                const finalUrl = page.url();
 
                 // Close browser
                 await browser.close();
@@ -68,7 +59,7 @@ router.post('/echo', async (req, res) => {
                     success: true,
                     message: 'Button clicked successfully',
                     navigationResult: {
-                        finalUrl: currentUrl,
+                        finalUrl,
                         expectedUrl: 'https://app.sapien.io/t/dashboard',
                         buttonClicked: true
                     }

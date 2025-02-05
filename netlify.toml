@@ -4,8 +4,8 @@
   publish = "public"
 
 [functions]
-  external_node_modules = ["chrome-aws-lambda", "puppeteer-core"]
-  included_files = ["node_modules/chrome-aws-lambda/**/*"]
+  external_node_modules = ["playwright-core"]
+  included_files = ["node_modules/playwright-core/**/*"]
   node_bundler = "esbuild"
 
 [[redirects]]
