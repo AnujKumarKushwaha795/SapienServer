@@ -12,9 +12,10 @@ app.use(cors({
 app.use(express.json());
 
 // Add a root route
-app.get('/', (req, res) => {
+app.get('/anuj', (req, res) => {
     res.send('Anuj: Server is running!');
 });
+
 
 // Route to handle "Play Now" button click
 app.post('/play-now', (req, res) => {
