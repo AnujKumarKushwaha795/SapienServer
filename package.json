@@ -1,13 +1,13 @@
 {
-  "name": "your-server",
+  "name": "sapien_server",
   "version": "1.0.0",
   "dependencies": {
     "@netlify/functions": "^2.0.0",
-    "express": "^4.18.2",
-    "cors": "^2.8.5"
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
   },
   "scripts": {
-    "start": "node server.js",
+    "start": "node sapien_server.js",
     "build": "echo 'No build required'"
   }
 }

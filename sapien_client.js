@@ -19,6 +19,7 @@ async function callServer() {
         console.error('Error calling server:', error);
     }
 } 
+callServer();
 
 // echo "# SapienServer" >> README.md
 // git init
@@ -26,4 +27,5 @@ async function callServer() {
 // git commit -m "first commit"
 // git branch -M main
 // git remote add origin https://github.com/AnujKumarKushwaha795/SapienServer.git
+
 // git push -u origin main

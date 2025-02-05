@@ -7,17 +7,28 @@ const app = express();
 // Add middleware
 app.use(cors({
     origin: [
-        'chrome-extension://your-extension-id',
-        'moz-extension://your-extension-id'
+        '*',
+        // 'chrome-extension://your-extension-id',
+        // 'moz-extension://your-extension-id'
     ],
+
     methods: ['GET', 'POST']
 }));
 app.use(express.json());
 
 // Add a root route
 app.get('/', (req, res) => {
-    res.send('Anuj: Server is running!');
+    return res.json(
+        {
+            Message:'Anuj: Server is running!',
+            timestamp: new Date().toISOString(),
+            status: 'success',
+            data: {
+                message: 'Server is running!'
+            }         
+        } );
 });
+
 
 // Route to handle "Play Now" button click
 app.post('/play-now', (req, res) => {

@@ -47,3 +47,8 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
+
+// Build logs:         https://app.netlify.com/sites/wootzappanuj/deploys
+// Function logs:      https://app.netlify.com/sites/wootzappanuj/logs/functions
+// Edge function Logs: https://app.netlify.com/sites/wootzappanuj/logs/edge-functions
+// Website URL:        https://wootzappanuj.netlify.app
