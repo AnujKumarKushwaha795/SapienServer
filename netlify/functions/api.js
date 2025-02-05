@@ -30,39 +30,38 @@ router.post('/echo', async (req, res) => {
     switch (action) {
         case 'play_now_clicked':
             try {
-                // Redirect URL for the game dashboard
-                const dashboardUrl = 'https://app.sapien.io/t/dashboard';
-                
-                // First get any necessary cookies/session
-                const initialResponse = await axios.get('https://app.sapien.io/', {
+                // First get the main page to find the button
+                const mainPageResponse = await axios.get('https://game.sapien.io/', {
                     headers: {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-                        'Accept-Language': 'en-US,en;q=0.9'
-                    },
-                    maxRedirects: 5,
-                    validateStatus: function (status) {
-                        return status >= 200 && status < 500;
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/121.0.0.0 Safari/537.36',
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
                     }
                 });
 
-                // Then try to access the dashboard
-                const dashboardResponse = await axios.get(dashboardUrl, {
+                // Simulate clicking the actual button
+                const clickResponse = await axios.post('https://game.sapien.io/', {
+                    buttonSelector: 'Hero_cta-button__oTOqM',
+                    action: 'click',
+                    elementData: {
+                        class: 'Hero_cta-button__oTOqM primary ResponsiveButton_button__Zvkip ResponsiveButton_primary__Ndytn',
+                        text: 'Play Now!'
+                    }
+                }, {
                     headers: {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-                        'Accept-Language': 'en-US,en;q=0.9',
-                        'Referer': 'https://app.sapien.io/',
-                        'Cookie': initialResponse.headers['set-cookie']?.join('; ') || ''
+                        'Content-Type': 'application/json',
+                        'Referer': 'https://game.sapien.io/',
+                        'Origin': 'https://game.sapien.io'
                     }
                 });
 
                 res.json({
                     success: true,
-                    message: 'Navigation attempted',
-                    redirectUrl: dashboardUrl,
-                    status: dashboardResponse.status,
-                    headers: dashboardResponse.headers
+                    message: 'Button click attempted',
+                    buttonInfo: {
+                        class: 'Hero_cta-button__oTOqM',
+                        text: 'Play Now!'
+                    },
+                    response: clickResponse.data
                 });
 
             } catch (error) {
@@ -74,7 +73,7 @@ router.post('/echo', async (req, res) => {
                 
                 res.status(500).json({
                     success: false,
-                    message: 'Failed to navigate to dashboard',
+                    message: 'Failed to click button',
                     error: {
                         message: error.message,
                         status: error.response?.status,
