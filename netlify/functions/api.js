@@ -30,48 +30,82 @@ router.post('/echo', async (req, res) => {
     switch (action) {
         case 'play_now_clicked':
             try {
-                // Step 1: Get the initial page and any necessary tokens/cookies
+                // Step 1: Initial page load to get session/tokens
                 const initialResponse = await axios.get('https://game.sapien.io/', {
                     headers: {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
                         'Accept-Language': 'en-US,en;q=0.9',
+                        'Accept-Encoding': 'gzip, deflate, br',
                         'Connection': 'keep-alive',
+                        'Sec-Fetch-Dest': 'document',
+                        'Sec-Fetch-Mode': 'navigate',
+                        'Sec-Fetch-Site': 'none',
+                        'Sec-Fetch-User': '?1',
                         'Upgrade-Insecure-Requests': '1'
+                    },
+                    maxRedirects: 5,
+                    validateStatus: function (status) {
+                        return status >= 200 && status < 500; // Accept all responses to analyze them
                     }
                 });
 
-                // Get cookies from the response
-                const cookies = initialResponse.headers['set-cookie'];
+                console.log('Initial response status:', initialResponse.status);
+                console.log('Initial response headers:', initialResponse.headers);
 
-                // Step 2: Click the Play Now button
-                const clickResponse = await axios.post('https://game.sapien.io/api/play', {
-                    buttonClass: 'ResponsiveButton_button__content__PruRK',
-                    buttonText: 'Play Now!',
-                    timestamp: new Date().toISOString()
-                }, {
+                // Step 2: Follow any redirects or get game state
+                const gameStateResponse = await axios.get('https://game.sapien.io/api/game-state', {
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Cookie': cookies ? cookies.join('; ') : '',
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+                        'Accept': 'application/json',
+                        'Accept-Language': 'en-US,en;q=0.9',
                         'Origin': 'https://game.sapien.io',
                         'Referer': 'https://game.sapien.io/',
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                        'Cookie': initialResponse.headers['set-cookie']?.join('; ') || '',
+                    }
+                });
+
+                // Step 3: Initiate game session
+                const playResponse = await axios.post('https://game.sapien.io/api/game/start', {
+                    timestamp: new Date().toISOString(),
+                    client: 'web',
+                    version: '1.0.0'
+                }, {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
                         'Accept': 'application/json',
-                        'Accept-Language': 'en-US,en;q=0.9'
+                        'Accept-Language': 'en-US,en;q=0.9',
+                        'Origin': 'https://game.sapien.io',
+                        'Referer': 'https://game.sapien.io/',
+                        'Content-Type': 'application/json',
+                        'Cookie': initialResponse.headers['set-cookie']?.join('; ') || '',
                     }
                 });
 
                 res.json({
-                    message: 'Successfully triggered Play Now action',
+                    message: 'Game session initiated',
                     success: true,
                     timestamp: new Date().toISOString(),
-                    responseData: clickResponse.data
+                    initialStatus: initialResponse.status,
+                    gameState: gameStateResponse.data,
+                    playResponse: playResponse.data
                 });
+
             } catch (error) {
-                console.error('Error:', error.response?.data || error.message);
+                console.error('Detailed error:', {
+                    message: error.message,
+                    response: error.response?.data,
+                    status: error.response?.status,
+                    headers: error.response?.headers
+                });
+                
                 res.status(500).json({
-                    message: 'Failed to trigger Play Now action',
-                    error: error.response?.data || error.message,
+                    message: 'Failed to initiate game session',
+                    error: {
+                        message: error.message,
+                        response: error.response?.data,
+                        status: error.response?.status
+                    },
                     success: false
                 });
             }
