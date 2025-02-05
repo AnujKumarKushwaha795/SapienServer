@@ -1,5 +1,5 @@
 const express = require('express');
-const serverless = require('@netlify/functions');
+const serverless = require('serverless-http');
 const cors = require('cors');
 
 const app = express();
@@ -32,6 +32,5 @@ app.post('/echo', (req, res) => {
     });
 });
 
-// Create handler
-const handler = serverless.handler(app);
-module.exports = { handler }; 
+// Export the serverless handler
+module.exports.handler = serverless(app); 

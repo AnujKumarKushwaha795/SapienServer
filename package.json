@@ -4,16 +4,14 @@
   "dependencies": {
     "@netlify/functions": "^2.0.0",
     "cors": "^2.8.5",
-    "express": "^4.21.2",
-    "netlify-cli": "^18.0.3",
-    "netlify-lambda": "^2.0.16",
+    "express": "^4.18.2",
     "serverless-http": "^3.2.0"
   },
   "scripts": {
-    "start": "node sapien_server.js",
-    "build": "echo 'No build required'"
+    "start": "node server.js",
+    "build": "netlify-lambda build"
   },
-  "main": "sapien_client.js",
+  "main": "server.js",
   "devDependencies": {},
   "repository": {
     "type": "git",
