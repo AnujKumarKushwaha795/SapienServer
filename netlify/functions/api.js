@@ -2,17 +2,16 @@ const express = require('express');
 const serverless = require('serverless-http');
 const cors = require('cors');
 
+const router = express.Router();
 const app = express();
 
 // Add middleware
-app.use(cors({
-    origin: '*',
-    methods: ['GET', 'POST']
-}));
+app.use(cors());
 app.use(express.json());
+app.use('/.netlify/functions/api', router);
 
 // Simple GET endpoint to test connection
-app.get('/', (req, res) => {
+router.get('/', (req, res) => {
     console.log('GET request received');
     res.json({
         message: 'Hello from Netlify Function!',
@@ -22,7 +21,7 @@ app.get('/', (req, res) => {
 });
 
 // Simple POST endpoint to echo back data
-app.post('/echo', (req, res) => {
+router.post('/echo', (req, res) => {
     console.log('POST request received with data:', req.body);
     res.json({
         message: 'Data received successfully',
