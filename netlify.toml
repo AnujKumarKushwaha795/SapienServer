@@ -1,16 +1,17 @@
 [build]
   functions = "netlify/functions"
+  command = "npm install"
   publish = "public"
 
 [functions]
+  external_node_modules = ["chrome-aws-lambda", "puppeteer-core"]
+  included_files = ["node_modules/chrome-aws-lambda/**/*"]
   node_bundler = "esbuild"
-  external_node_modules = ["axios"]
 
 [[redirects]]
-  from = "/*"
+  from = "/api/*"
   to = "/.netlify/functions/api/:splat"
   status = 200
-  force = true
 
 [dev]
   publish = "public"
