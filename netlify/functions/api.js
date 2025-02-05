@@ -1,7 +1,8 @@
 const express = require('express');
 const serverless = require('serverless-http');
 const cors = require('cors');
-const axios = require('axios');
+const chromium = require('chrome-aws-lambda');
+const puppeteer = require('puppeteer-core');
 
 const router = express.Router();
 const app = express();
@@ -30,54 +31,57 @@ router.post('/echo', async (req, res) => {
     switch (action) {
         case 'play_now_clicked':
             try {
-                // First get the main page to find the button
-                const mainPageResponse = await axios.get('https://game.sapien.io/', {
-                    headers: {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/121.0.0.0 Safari/537.36',
-                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
-                    }
+                // Launch browser
+                const browser = await puppeteer.launch({
+                    args: chromium.args,
+                    defaultViewport: chromium.defaultViewport,
+                    executablePath: await chromium.executablePath,
+                    headless: true,
                 });
 
-                // Simulate clicking the actual button
-                const clickResponse = await axios.post('https://game.sapien.io/', {
-                    buttonSelector: 'Hero_cta-button__oTOqM',
-                    action: 'click',
-                    elementData: {
-                        class: 'Hero_cta-button__oTOqM primary ResponsiveButton_button__Zvkip ResponsiveButton_primary__Ndytn',
-                        text: 'Play Now!'
-                    }
-                }, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Referer': 'https://game.sapien.io/',
-                        'Origin': 'https://game.sapien.io'
-                    }
+                // Create new page
+                const page = await browser.newPage();
+                
+                // Navigate to Sapien
+                await page.goto('https://game.sapien.io/', {
+                    waitUntil: 'networkidle0',
                 });
+
+                // Wait for button to be visible
+                await page.waitForSelector('.Hero_cta-button__oTOqM');
+
+                // Click the button
+                await page.click('.Hero_cta-button__oTOqM');
+
+                // Wait for navigation
+                await page.waitForNavigation({
+                    waitUntil: 'networkidle0',
+                });
+
+                // Get current URL
+                const currentUrl = page.url();
+
+                // Close browser
+                await browser.close();
 
                 res.json({
                     success: true,
-                    message: 'Button click attempted',
-                    buttonInfo: {
-                        class: 'Hero_cta-button__oTOqM',
-                        text: 'Play Now!'
-                    },
-                    response: clickResponse.data
+                    message: 'Button clicked successfully',
+                    navigationResult: {
+                        finalUrl: currentUrl,
+                        expectedUrl: 'https://app.sapien.io/t/dashboard',
+                        buttonClicked: true
+                    }
                 });
 
             } catch (error) {
-                console.error('Error details:', {
-                    message: error.message,
-                    response: error.response?.data,
-                    status: error.response?.status
-                });
-                
+                console.error('Error details:', error);
                 res.status(500).json({
                     success: false,
                     message: 'Failed to click button',
                     error: {
                         message: error.message,
-                        status: error.response?.status,
-                        data: error.response?.data
+                        stack: error.stack
                     }
                 });
             }
