@@ -6,66 +6,29 @@ const app = express();
 
 // Add middleware
 app.use(cors({
-    origin: [
-        '*',
-        // 'chrome-extension://your-extension-id',
-        // 'moz-extension://your-extension-id'
-    ],
-
+    origin: '*',
     methods: ['GET', 'POST']
 }));
 app.use(express.json());
 
-// Add a root route
+// Simple GET endpoint to test connection
 app.get('/', (req, res) => {
-    console.log('GET request received at /', {
+    console.log('GET request received');
+    res.json({
+        message: 'Hello from Netlify Function!',
         timestamp: new Date().toISOString(),
-        headers: req.headers,
-        query: req.query
-    });
-    
-    return res.json({
-        Message:'Anuj: Server is running!',
-        timestamp: new Date().toISOString(),
-        status: 'success',
-        data: {
-            message: 'Server is running!'
-        }         
+        success: true
     });
 });
 
-
-// Route to handle "Play Now" button click
-app.post('/play-now', (req, res) => {
-    try {
-        console.log('POST request received at /play-now', {
-            timestamp: new Date().toISOString(),
-            body: req.body,
-            headers: req.headers
-        });
-        
-        res.json({ 
-            success: true, 
-            message: 'Play Now button clicked successfully! on server',
-            timestamp: new Date().toISOString(),
-            receivedData: req.body
-        });
-    } catch (error) {
-        console.error('Error in /play-now route:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Internal server error',
-            error: error.message
-        });
-    }
-});
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ 
-        success: false, 
-        message: 'Something broke!'
+// Simple POST endpoint to echo back data
+app.post('/echo', (req, res) => {
+    console.log('POST request received with data:', req.body);
+    res.json({
+        message: 'Data received successfully',
+        receivedData: req.body,
+        timestamp: new Date().toISOString(),
+        success: true
     });
 });
 

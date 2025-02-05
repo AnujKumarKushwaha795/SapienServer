@@ -12,5 +12,19 @@
   "scripts": {
     "start": "node sapien_server.js",
     "build": "echo 'No build required'"
-  }
+  },
+  "main": "sapien_client.js",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AnujKumarKushwaha795/SapienServer.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AnujKumarKushwaha795/SapienServer/issues"
+  },
+  "homepage": "https://github.com/AnujKumarKushwaha795/SapienServer#readme",
+  "description": ""
 }
