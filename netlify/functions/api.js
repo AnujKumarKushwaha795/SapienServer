@@ -111,5 +111,15 @@ router.post('/click-play', async (req, res) => {
     }
 });
 
+// Add this new endpoint after other router endpoints and before module.exports
+router.get('/health', (req, res) => {
+    console.log('Health check request received');
+    res.json({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || 'development'
+    });
+});
+
 // Export the serverless handler
 module.exports.handler = serverless(app); 
