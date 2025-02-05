@@ -158,5 +158,51 @@ router.get('/health', (req, res) => {
     });
 });
 
+router.post('/play-game', async (req, res) => {
+    try {
+        // Step 1: Get initial page and any tokens
+        const pageResponse = await axios.get('https://game.sapien.io/', {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/121.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8'
+            }
+        });
+
+        // Extract any necessary tokens from the page
+        const html = pageResponse.data;
+        // We need to know what tokens/data to extract from the HTML
+
+        // Step 2: Make the actual game initialization request
+        // We need the actual endpoint and payload structure
+        const gameResponse = await axios.post('https://game.sapien.io/actual-endpoint', {
+            // Payload structure needs to be determined
+        }, {
+            headers: {
+                'Origin': 'https://game.sapien.io',
+                'Referer': 'https://game.sapien.io/'
+            }
+        });
+
+        res.json({
+            success: true,
+            message: 'Game initialization attempted',
+            data: gameResponse.data
+        });
+
+    } catch (error) {
+        console.error('Error details:', {
+            message: error.message,
+            response: error.response?.data,
+            status: error.response?.status
+        });
+        
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            details: error.response?.data
+        });
+    }
+});
+
 // Export the serverless handler
 module.exports.handler = serverless(app); 
