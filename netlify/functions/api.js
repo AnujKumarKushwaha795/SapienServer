@@ -31,44 +31,47 @@ router.post('/echo', async (req, res) => {
         case 'play_now_clicked':
             try {
                 // Step 1: Get the initial page and any necessary tokens/cookies
-                const initialResponse = await fetch('https://game.sapien.io/', {
+                const initialResponse = await axios.get('https://game.sapien.io/', {
                     headers: {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                        'Accept-Language': 'en-US,en;q=0.9',
+                        'Connection': 'keep-alive',
+                        'Upgrade-Insecure-Requests': '1'
                     }
                 });
 
-                // Get any cookies from the response
-                const cookies = initialResponse.headers.get('set-cookie');
+                // Get cookies from the response
+                const cookies = initialResponse.headers['set-cookie'];
 
-                // Step 2: Replicate the Play Now button click request
-                // We'll need to fill in these details based on the analysis
-                const clickResponse = await fetch('https://game.sapien.io/api/play', {
-                    method: 'POST',
+                // Step 2: Click the Play Now button
+                const clickResponse = await axios.post('https://game.sapien.io/api/play', {
+                    buttonClass: 'ResponsiveButton_button__content__PruRK',
+                    buttonText: 'Play Now!',
+                    timestamp: new Date().toISOString()
+                }, {
                     headers: {
                         'Content-Type': 'application/json',
-                        'Cookie': cookies,
+                        'Cookie': cookies ? cookies.join('; ') : '',
                         'Origin': 'https://game.sapien.io',
-                        'Referer': 'https://game.sapien.io/'
-                    },
-                    body: JSON.stringify({
-                        // Add any required data based on analysis
-                        timestamp: new Date().toISOString()
-                    })
+                        'Referer': 'https://game.sapien.io/',
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                        'Accept': 'application/json',
+                        'Accept-Language': 'en-US,en;q=0.9'
+                    }
                 });
 
-                const data = await clickResponse.json();
-                
                 res.json({
-                    message: 'Attempted to trigger Play Now action',
+                    message: 'Successfully triggered Play Now action',
                     success: true,
                     timestamp: new Date().toISOString(),
-                    responseData: data
+                    responseData: clickResponse.data
                 });
             } catch (error) {
-                console.error('Error:', error);
+                console.error('Error:', error.response?.data || error.message);
                 res.status(500).json({
                     message: 'Failed to trigger Play Now action',
-                    error: error.message,
+                    error: error.response?.data || error.message,
                     success: false
                 });
             }
