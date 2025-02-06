@@ -1,7 +1,6 @@
 const express = require('express');
 const serverless = require('serverless-http');
 const cors = require('cors');
-const playwright = require('playwright-core');
 
 const router = express.Router();
 const app = express();
@@ -30,50 +29,22 @@ router.post('/echo', async (req, res) => {
     switch (action) {
         case 'play_now_clicked':
             try {
-                // Launch browser
-                const browser = await playwright.chromium.launch({
-                    headless: true
-                });
-
-                // Create new context and page
-                const context = await browser.newContext();
-                const page = await context.newPage();
-                
-                // Navigate to Sapien
-                await page.goto('https://game.sapien.io/');
-
-                // Wait for button and click it
-                const button = await page.waitForSelector('.Hero_cta-button__oTOqM');
-                await button.click();
-
-                // Wait for navigation
-                await page.waitForURL('https://app.sapien.io/t/dashboard', { timeout: 10000 });
-
-                // Get final URL
-                const finalUrl = page.url();
-
-                // Close browser
-                await browser.close();
-
+                // Return instructions for client-side execution
                 res.json({
                     success: true,
-                    message: 'Button clicked successfully',
-                    navigationResult: {
-                        finalUrl,
-                        expectedUrl: 'https://app.sapien.io/t/dashboard',
-                        buttonClicked: true
+                    message: 'Click instructions sent',
+                    action: {
+                        type: 'click',
+                        selector: '.Hero_cta-button__oTOqM',
+                        expectedUrl: 'https://app.sapien.io/t/dashboard'
                     }
                 });
-
             } catch (error) {
-                console.error('Error details:', error);
+                console.error('Error:', error);
                 res.status(500).json({
                     success: false,
-                    message: 'Failed to click button',
-                    error: {
-                        message: error.message,
-                        stack: error.stack
-                    }
+                    message: 'Failed to process request',
+                    error: error.message
                 });
             }
             break;
